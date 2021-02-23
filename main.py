@@ -1,35 +1,58 @@
 import uuid
 
 # For subatomic physics, todo after atomic
+class Photon:
+    """iLLUMINATE"""
+
+    def __init__(self):
+        self._photon_id = str(uuid.uuid4())
+
+    
 class Proton:
     """The One"""
 
     def __init__(self):
-        self.symbol = 'p+'
-        self.charge = 1
+        """Initialise an new Proton instance
+
+
+        """
+        self._proton_id = str(uuid.uuid4())
+        self._symbol = 'p+'
+        self._charge = 1
 
 
 class Neutron:
     """The chargeless one"""
 
     def __def__(self):
-        self.symbol = 'n0'
-        self.charge = 0
+        """Initialise an new Neutron instance
+
+
+        """
+        self._neutron_id = str(uuid.uuid4())
+        self._symbol = 'n0'
+        self._charge = 0
 
 
 class Electron:
     """Pikachu"""
 
     def __init__(self):
-        self.symbol = 'e-'
-        self.charge = -1
+        """Initialise an new Electron instance
 
 
+        """
+        self._electron_id = str(uuid.uuid4())
+        self._symbol = 'e-'
+        self._charge = -1
+
+
+    
 class Atom:
     """An atom, duh"""
 
     def __init__(self, atomic_properties):
-        """Create a new atom instance
+        """Create a new Atom instance
 
         atomic id  the atoms unique identifier
         name       the atoms name
@@ -67,18 +90,19 @@ class Atom:
     def __len__(self):
         return self._atomic_radius * 2 # len(Atom) returns atomic diameter
 
-
-    # As a general rule, we will treat all data members as nonpublic.
     def get_symbol(self):
         return self._symbol
 
-# Molecule + Atom = Molecule(Molecule.atoms, Atom)
-# Consider how to create molecular intuition, e.g., avoiding rendering C02 as 02C
 
 class Molecule:
-    """An atomic cartel"""
+   """An atomic cartel"""
 
     def __init__(self, molecular_properties):
+        """Initialise an new Molecule instance
+
+
+        """
+        self.molecular_id = str(uuid.uuid4())
         self._atomic_members = molecular_properties['atomic_members']
         self._empirical_formula = self._calculate_emperical_formula()
         self._atomic_bonds = [
@@ -86,22 +110,36 @@ class Molecule:
             { 'bond_type': 'hydrogen', 'members': [] }
         ]
 
+    # todo: support adding molecules to molecules
     def __add__(self, atomic_additive):
         atomic_members = self._atomic_members + [atomic_additive]
         return Molecule({ 'atomic_members': atomic_members })
 
     def __sub__(self, atomic_member):
-        new_atomic_members = self._atomic_members.remove()        
+        new_atomic_members = self._atomic_members.remove()  
+        # return molecule with ammended memmbers
+
+    def __contains__(self, atomic_member):
+        return str(atomic_member) in self.list_atomic_members()
+
+    def __len__(self):
+        return len(self._atomic_members)
+
+    def __getitem__(self, index):
+        return self._atomic_members[index]
 
     def list_atomic_members(self):
         return [str(atom) for atom in self._atomic_members]
 
+    def get_empirical_formula(self):
+        return self._empirical_formula
+
     def _calculate_emperical_formula(self):
-        counted = []
-        empirical_formula = ''
+        counted = []        empirical_formula = ''
         for atom in self._atomic_members:
+            print(self._atomic_members)
             if str(atom) not in counted:
-                empirical_formula += f'{atom.symbol}{self.list_atomic_members().count(str(atom))}'
+                empirical_formula += f'{atom.get_symbol()}{self.list_atomic_members().count(str(atom))}'
                 counted.append(str(atom))
         return empirical_formula.replace('1', '')
 
@@ -111,7 +149,9 @@ Hydrogen = Atom({
     'name': 'Hydrogen',
     'symbol': 'H',
     'atomic_number': 1,
-    'protons': [ Proton() ]
+    'protons': [ Proton() ],
+    'neutrons': [ Neutron() ],
+    'electrons': [ Electron() ],
     'atomic_weight': { 'value': 1.0079, 'unit': 'g/mol' },
     'density': { 'value': 0.0000899, 'unit': 'g/cm3' },
     'atomic_radius': { 'value': 53, 'unit': 'pm' },
@@ -132,10 +172,13 @@ Oxygen = Atom({
     'name': 'Oxygen',
     'symbol': 'O',
     'atomic_number': 8,
+    'protons': [ Proton() for i in range(8) ],
+    'neutrons': [ Neutron() for i in range(8) ],
+    'electrons': [ Electron() for i in range(8) ],
     'atomic_weight': { 'value': 15.9994, 'unit': 'g/mol' },
     'density': { 'value': 0.00142897, 'unit': 'g/cm3' },
     'atomic_radius': { 'value': 48, 'unit': 'pm' },
-   'covalent_radius': { 'value': 66, 'unit': 'pm' },
+    'covalent_radius': { 'value': 66, 'unit': 'pm' },
     'van_der_waals_radius': { 'value': 152, 'unit': 'pm' },
     'melting_point': { 'value': -218.4, 'unit': 'celcius' },
     'boiling_point': { 'value': -182.9, 'unit': 'celcius' },
@@ -148,6 +191,29 @@ Oxygen = Atom({
     'electronic_configuration': { 'K': 1 }
 })
 
+
+class AtomicError(Exception):
+    """A generic error occuring at the atomic level"""
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return(repr(self.value))
+
+
+class MolecularError(Exception):
+    """Generic molecular level error""""
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 if __name__ == '__main__':
     # tests
     print('Atoms rule the world.')
+
+# TODO: Consider how to create molecular intuition, e.g., avoiding rendering C02 as 02C
