@@ -1,8 +1,11 @@
 import uuid
 
 # For subatomic physics, todo after atomic
+# Note: Using slots for subatomic namespaces for better memorey efficiency
 class Photon:
     """iLLUMINATE"""
+
+    __slots__ = '_photon_id',
 
     def __init__(self):
         """Initialise a new Photon instance
@@ -11,9 +14,12 @@ class Photon:
         """
         self._photon_id = str(uuid.uuid4())
 
+
     
 class Proton:
     """The One"""
+
+    __slots__ = '_proton_id', '_symbol', '_charge'
 
     def __init__(self):
         """Initialise a new Proton instance
@@ -28,6 +34,8 @@ class Proton:
 class Neutron:
     """The chargeless one"""
 
+    __slots__ = '_neutron_id', '_symbol', '_charge'
+
     def __def__(self):
         """Initialise a new Neutron instance
 
@@ -40,6 +48,8 @@ class Neutron:
 
 class Electron:
     """Pikachu"""
+
+    __slots__ = '_electron_id', '_symbol', '_charge'
 
     def __init__(self):
         """Initialise a new Electron instance
@@ -91,13 +101,14 @@ class Atom:
     def __str__(self):
         return self._name
 
-    def __len__(self):
-        return self._atomic_radius * 2 # len(Atom) returns atomic diameter
-
     def get_symbol(self):
         return self._symbol
 
     # def share_electron(self, atom) # for later
+
+    # def donate_electron(self, atom)
+
+    # def accept_electron(self, atom)
 
     def _calculate_valence(self):
         # This will break when an atom has no electrons, TODO: some robustness here
@@ -182,7 +193,7 @@ class Molecule:
 
 
         """
-        self.molecular_id = str(uuid.uuid4())
+        self._molecular_id = str(uuid.uuid4())
         self._atomic_members = molecular_properties['atomic_members']
         self._empirical_formula = self._calculate_emperical_formula()
         self._atomic_bonds = [
