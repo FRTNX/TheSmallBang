@@ -97,18 +97,18 @@ class Atom:
     def get_symbol(self):
         return self._symbol
 
-    def share_electron(self, atom)
+    # def share_electron(self, atom) # for later
 
     def _calculate_valence(self):
         # This will break when an atom has no electrons, TODO: some robustness here
-        number_outermost_atoms = self._electron_configuration['format'][-1]
+        number_outermost_electrons = self._electron_configuration['format'][-1]
         if (self._electron_configuration['outermost_shell'] != 'K'):
-            number_missing_atoms = 8 - number_outermost_atoms
-            if number_missing_atoms > 4:
-                return -(8 - number_missing_atoms)
-            return number_missing_atoms
+            number_missing_electrons = 8 - number_outermost_electrons
+            if number_missing_electrons > 4:
+                return -(8 - number_missing_electrons)
+            return number_missing_electrons
 
-        return (2 - number_outermost_atoms)
+        return (2 - number_outermost_electrons)
 
     def _configure_electrons(self):
         electron_config = {
@@ -132,7 +132,7 @@ class Atom:
                 electron_config['configuration']['K'].append(electron)
                 continue
 
-            if len(electron_config['configuration']['L']) < 8:
+            if len(electron_config['configuration']['L']) < 8:# This will break when an atom has no electrons, TODO: some robustness here
                 electron_config['configuration']['L'].append(electron)
                 continue
 
