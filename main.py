@@ -5,6 +5,10 @@ class Photon:
     """iLLUMINATE"""
 
     def __init__(self):
+        """Initialise a new Photon instance
+
+
+        """
         self._photon_id = str(uuid.uuid4())
 
     
@@ -12,7 +16,7 @@ class Proton:
     """The One"""
 
     def __init__(self):
-        """Initialise an new Proton instance
+        """Initialise a new Proton instance
 
 
         """
@@ -25,7 +29,7 @@ class Neutron:
     """The chargeless one"""
 
     def __def__(self):
-        """Initialise an new Neutron instance
+        """Initialise a new Neutron instance
 
 
         """
@@ -38,7 +42,7 @@ class Electron:
     """Pikachu"""
 
     def __init__(self):
-        """Initialise an new Electron instance
+        """Initialise a new Electron instance
 
 
         """
@@ -71,13 +75,13 @@ class Atom:
         self._atomic_radius = atomic_properties['atomic_radius']
         self._melting_point = atomic_properties['melting_point']
         self._boiling_point = atomic_properties['boiling_point']
-        self._phase = atomic_properties['phase']
-        self._valence = atomic_properties['valence']
+        self._phase = atomic_properties['phase'] # consider calculating from density
+        self._electron_configuration = self._configure_electrons()
+        self._valence = self._calculate_valence()
         self._period = atomic_properties['period']
         self._group = atomic_properties['group']
         self._atomic_radius = atomic_properties['atomic_radius']
         self._ionisation_potential = atomic_properties['ionisation_potential']
-        self._electronic_configuration = atomic_properties['electronic_configuration']
 
     def __add__(self, atomic_additive):
         return Molecule({ 'atomic_members': [self, atomic_additive] })
@@ -93,12 +97,88 @@ class Atom:
     def get_symbol(self):
         return self._symbol
 
+    def share_electron(self, atom)
+
+    def _calculate_valence(self):
+        # This will break when an atom has no electrons, TODO: some robustness here
+        number_outermost_atoms = self._electron_configuration['format'][-1]
+        if (self._electron_configuration['outermost_shell'] != 'K'):
+            number_missing_atoms = 8 - number_outermost_atoms
+            if number_missing_atoms > 4:
+                return -(8 - number_missing_atoms)
+            return number_missing_atoms
+
+        return (2 - number_outermost_atoms)
+
+    def _configure_electrons(self):
+        electron_config = {
+            'is_octate_state': None,
+            'outermost_shell': None,
+            'format': [],
+            'configuration': {
+                'K': [],
+                'L': [],
+                'M': [],
+                'N': [],
+                'O': [],
+                'P': [],
+                'Q': [],
+                'R': []
+            }
+        }
+         
+        for electron in self._electrons:
+            if len(electron_config['configuration']['K']) < 2:
+                electron_config['configuration']['K'].append(electron)
+                continue
+
+            if len(electron_config['configuration']['L']) < 8:
+                electron_config['configuration']['L'].append(electron)
+                continue
+
+            if len(electron_config['configuration']['M']) < 8:
+                electron_config['configuration']['M'].append(electron)
+                continue
+
+            if len(electron_config['configuration']['N']) < 8:
+                electron_config['configuration']['N'].append(electron)
+                continue
+
+            if len(electron_config['configuration']['O']) < 8:
+                electron_config['configuration']['O'].append(electron)
+                continue
+
+            if len(electron_config['configuration']['P']) < 8:
+                electron_config['configuration']['P'].append(electron)
+                continue
+
+            if len(electron_config['configuration']['Q']) < 8:
+                electron_config['configuration']['Q'].append(electron)
+                continue
+
+            if len(electron_config['configuration']['R']) < 8:
+                electron_config['configuration']['R'].append(electron)
+                continue
+
+        for electron_shell in list(electron_config['configuration']):
+            electron_count = len(electron_config['configuration'][electron_shell])
+            if electron_count > 0:
+                electron_config['format'].append(electron_count)
+
+        # TODO: Test on atom with no electrons
+        electron_config['outermost_shell'] = list(electron_config['configuration'])[len(electron_config['format']) -1]
+
+        electron_config['is_octate_state'] = True if electron_config['format'][-1] in [2, 8] else False
+        
+        # TODO: Some serious code reduction here
+        return electron_config
+
 
 class Molecule:
-   """An atomic cartel"""
+    """An atomic cartel"""
 
     def __init__(self, molecular_properties):
-        """Initialise an new Molecule instance
+        """Initialise a new Molecule instance
 
 
         """
@@ -135,14 +215,14 @@ class Molecule:
         return self._empirical_formula
 
     def _calculate_emperical_formula(self):
-        counted = []        empirical_formula = ''
+        counted = []
+        empirical_formula = ''
         for atom in self._atomic_members:
             print(self._atomic_members)
             if str(atom) not in counted:
                 empirical_formula += f'{atom.get_symbol()}{self.list_atomic_members().count(str(atom))}'
                 counted.append(str(atom))
         return empirical_formula.replace('1', '')
-
 
 
 Hydrogen = Atom({
@@ -160,12 +240,10 @@ Hydrogen = Atom({
     'melting_point': { 'value': -259.1, 'unit': 'celcius' },
     'boiling_point': { 'value': -252.9, 'unit': 'celcius' },
     'phase': 'gas',
-    'valence': 1,
     'period': 1,
     'group': 'IA',
     'block': 's-block',
     'ionisation_potential': { 'value': 13.53, 'unit': 'eV' },
-    'electronic_configuration': { 'K': 1 }
 })
 
 Oxygen = Atom({
@@ -183,12 +261,10 @@ Oxygen = Atom({
     'melting_point': { 'value': -218.4, 'unit': 'celcius' },
     'boiling_point': { 'value': -182.9, 'unit': 'celcius' },
     'phase': 'gas',
-    'valence': -2,
     'period': 2,
     'group': 'VIA',
     'block': 'p-block',
     'ionisation_potential': { 'value': 13.56, 'unit': 'eV' },
-    'electronic_configuration': { 'K': 1 }
 })
 
 
@@ -203,7 +279,7 @@ class AtomicError(Exception):
 
 
 class MolecularError(Exception):
-    """Generic molecular level error""""
+    """Generic molecular level error"""
 
     def __init__(self, value):
         self.value = value
@@ -213,7 +289,6 @@ class MolecularError(Exception):
 
 
 if __name__ == '__main__':
-    # tests
     print('Atoms rule the world.')
 
 # TODO: Consider how to create molecular intuition, e.g., avoiding rendering C02 as 02C
