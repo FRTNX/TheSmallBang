@@ -1,6 +1,5 @@
 import uuid
 
-# For subatomic physics, todo after atomic
 # Note: Using slots for subatomic namespaces for better memorey efficiency
 class Photon:
     """iLLUMINATE"""
@@ -13,7 +12,6 @@ class Photon:
 
         """
         self._photon_id = str(uuid.uuid4())
-
 
     
 class Proton:
@@ -49,7 +47,7 @@ class Neutron:
 class Electron:
     """Pikachu"""
 
-    __slots__ = '_electron_id', '_symbol', '_charge'
+    __slots__ = '_electron_id', '_symbol', '_charge', '_associated_atoms'
 
     def __init__(self):
         """Initialise a new Electron instance
@@ -59,7 +57,13 @@ class Electron:
         self._electron_id = str(uuid.uuid4())
         self._symbol = 'e-'
         self._charge = -1
+        self._associated_atoms = []
 
+    def associate_atom(self, atom):
+        self._associated_atoms.append(atom)
+
+    def get_associated_atoms():
+        return self._associated_atoms
 
     
 class Atom:
@@ -75,7 +79,7 @@ class Atom:
         self._atomic_id = str(uuid.uuid4())
         self._protons = atomic_properties['protons']
         self._neutrons = atomic_properties['neutrons']
-        self._electrons = atomic_properties['electrons']
+        self._electrons = accept_electrons(atomic_properties['electrons'])
         self._is_neutral = len(self._electrons) == len(self._protons)
         self._name = atomic_properties['name']
         self._symbol = atomic_properties['symbol']
@@ -94,6 +98,9 @@ class Atom:
         self._ionisation_potential = atomic_properties['ionisation_potential']
 
     def __add__(self, atomic_additive):
+        if self.is_octate() or atomic_additive.is_octate():
+            raise AtomicError('Cannot bond with noble atom')
+            
         return Molecule({ 'atomic_members': [self, atomic_additive] })
 
     # def __sub__(self) # this would remove electrons, protons, etc
@@ -104,11 +111,26 @@ class Atom:
     def get_symbol(self):
         return self._symbol
 
-    # def share_electron(self, atom) # for later
+    def is_octate():
+        return self._electron_configuration['is_octate_state']
+
+    def share_electron(self, other_atom):
+        sharable_electron = self._find_sharable_electron()
+        if not sharable_electron:
+            raise AtomicError('No sharable electrons found')
+
+        return other_atom.accept_electrons([sharable_electron])
 
     # def donate_electron(self, atom)
 
-    # def accept_electron(self, atom)
+    def accept_electrons(self, electrons):
+        if self._electron_configuration['is_octate_state']:
+            raise AtomicError('Cannot accept electrons when atom is noble')
+            
+        for electron in electrons:
+            electron.associate_atom(self)
+
+        return electrons
 
     def _calculate_valence(self):
         # This will break when an atom has no electrons, TODO: some robustness here
@@ -183,6 +205,13 @@ class Atom:
         
         # TODO: Some serious code reduction here
         return electron_config
+
+        def _find_sharable_electron():
+            outermost_electrons = self._electron_configuration['configuration'][self._electron_configuration['outermost_shell']]
+            for electron in outermost_electrons:
+                if len(electron.get_associated_atoms()) == 1:
+                    return electron
+            return None
 
 
 class Molecule:
