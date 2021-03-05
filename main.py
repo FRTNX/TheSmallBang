@@ -83,7 +83,7 @@ class Atom:
         self._is_neutral = len(self._electrons) == len(self._protons)
         self._name = atomic_properties['name']
         self._symbol = atomic_properties['symbol']
-        self._atomic_number = atomic_properties['atomic_number']
+        self._atomic_number = len(atomic_properties['protons'])
         self._atomic_weight = atomic_properties['atomic_weight']
         self._density = atomic_properties['density']
         self._atomic_radius = atomic_properties['atomic_radius']
@@ -96,20 +96,24 @@ class Atom:
         self._group = atomic_properties['group']
         self._atomic_radius = atomic_properties['atomic_radius']
         self._ionisation_potential = atomic_properties['ionisation_potential']
-        self.accept_electrons(atomic_properties['electrons'])
+        if len(atomic_properties['electrons']) > 0:
+            self.accept_electrons(atomic_properties['electrons'])
 
     def __add__(self, atomic_additive):
         if self.is_octate() or atomic_additive.is_octate():
             raise AtomicError('Cannot bond with noble atom')
-
-        # associate electrons to atoms
-        # associate atoms to electrons
 
         self.share_electron(atomic_additive)
             
         return Molecule({ 'atomic_members': [self, atomic_additive] })
 
     # def __sub__(self) # this would remove electrons, protons, etc
+
+
+    # for dict(Atom), should return a dictionary representation of atomic state
+    def __iter__(self):
+        for key in self.__dict__:
+            yield key, getattr(self, key)
 
     def __str__(self):
         return self._name
@@ -124,6 +128,9 @@ class Atom:
         return self._electron_configuration['is_octate_state']
 
     def share_electron(self, other_atom):
+        """Shares a single electron with aother atom, if self is 
+           not in octate state, of course
+        """
         sharable_electron = self._find_sharable_electron()
         if not sharable_electron:
             raise AtomicError('No sharable electrons found')
@@ -133,6 +140,7 @@ class Atom:
     # def donate_electron(self, atom)
 
     def accept_electrons(self, electrons, share=False):
+        """Accepts one or more electrons if not outermost electron shell not octate"""
         if self._electron_configuration['is_octate_state']:
             raise AtomicError('Cannot accept electrons when atom is noble')
             
@@ -244,7 +252,9 @@ class Molecule:
             { 'bond_type': 'hydrogen', 'members': [] }
         ]
 
-    # todo: support adding molecules to molecules
+    # TODO: support adding molecules to molecules
+    # This may be a good place to make some valence calculations and ensure an electron
+    # isn't shared by more than 2 atoms
     def __add__(self, atomic_additive):
         atomic_members = self._atomic_members + [atomic_additive]
         return Molecule({ 'atomic_members': atomic_members })
@@ -282,7 +292,6 @@ class Molecule:
 Hydrogen = Atom({
     'name': 'Hydrogen',
     'symbol': 'H',
-    'atomic_number': 1,
     'protons': [ Proton() ],
     'neutrons': [ Neutron() ],
     'electrons': [ Electron() ],
@@ -303,7 +312,6 @@ Hydrogen = Atom({
 Oxygen = Atom({
     'name': 'Oxygen',
     'symbol': 'O',
-    'atomic_number': 8,
     'protons': [ Proton() for i in range(8) ],
     'neutrons': [ Neutron() for i in range(8) ],
     'electrons': [ Electron() for i in range(8) ],
@@ -319,6 +327,26 @@ Oxygen = Atom({
     'group': 'VIA',
     'block': 'p-block',
     'ionisation_potential': { 'value': 13.56, 'unit': 'eV' },
+})
+
+Carbon = Atom({
+    'name': 'Carbon',
+    'symbol': 'C',
+    'protons': [ Proton() for i in range(6) ],
+    'neutrons': [ Neutron() for i in range(6) ],
+    'electrons': [ Electron() for i in range(6) ],
+    'atomic_weight': { 'value': 12.0107, 'unit': 'g/mol' },
+    'density': { 'value': 2.26, 'unit': 'g/cm3' },
+    'atomic_radius': { 'value': 77, 'unit': 'pm' },
+    'covalent_radius': { 'value': 77, 'unit': 'pm' },
+    'van_der_waals_radius': { 'value': 170, 'unit': 'pm' },
+    'melting_point': { 'value': 3550, 'unit': 'celcius' },
+    'boiling_point': { 'value': 4027, 'unit': 'celcius' },
+    'phase': 'solid',
+    'period': 2,
+    'group': 'IVA',
+    'block': 'p-block',
+    'ionisation_potential': { 'value': 11.22, 'unit': 'eV' },
 })
 
 
