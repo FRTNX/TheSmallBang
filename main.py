@@ -62,12 +62,12 @@ class Electron:
     def associate_atom(self, atom):
         self._associated_atoms.append(atom)
 
-    def get_associated_atoms():
+    def get_associated_atoms(self):
         return self._associated_atoms
 
     
 class Atom:
-    """An atom, duh"""
+    """An Atom"""
 
     def __init__(self, atomic_properties):
         """Create a new Atom instance
@@ -79,7 +79,7 @@ class Atom:
         self._atomic_id = str(uuid.uuid4())
         self._protons = atomic_properties['protons']
         self._neutrons = atomic_properties['neutrons']
-        self._electrons = accept_electrons(atomic_properties['electrons'])
+        self._electrons = atomic_properties['electrons']
         self._is_neutral = len(self._electrons) == len(self._protons)
         self._name = atomic_properties['name']
         self._symbol = atomic_properties['symbol']
@@ -96,10 +96,16 @@ class Atom:
         self._group = atomic_properties['group']
         self._atomic_radius = atomic_properties['atomic_radius']
         self._ionisation_potential = atomic_properties['ionisation_potential']
+        self.accept_electrons(atomic_properties['electrons'])
 
     def __add__(self, atomic_additive):
         if self.is_octate() or atomic_additive.is_octate():
             raise AtomicError('Cannot bond with noble atom')
+
+        # associate electrons to atoms
+        # associate atoms to electrons
+
+        self.share_electron(atomic_additive)
             
         return Molecule({ 'atomic_members': [self, atomic_additive] })
 
@@ -111,7 +117,10 @@ class Atom:
     def get_symbol(self):
         return self._symbol
 
-    def is_octate():
+    def get_electrons(self):
+        return self._electron_configuration['configuration']
+
+    def is_octate(self):
         return self._electron_configuration['is_octate_state']
 
     def share_electron(self, other_atom):
@@ -119,18 +128,30 @@ class Atom:
         if not sharable_electron:
             raise AtomicError('No sharable electrons found')
 
-        return other_atom.accept_electrons([sharable_electron])
+        return other_atom.accept_electrons([sharable_electron], True)
 
     # def donate_electron(self, atom)
 
-    def accept_electrons(self, electrons):
+    def accept_electrons(self, electrons, share=False):
         if self._electron_configuration['is_octate_state']:
             raise AtomicError('Cannot accept electrons when atom is noble')
             
         for electron in electrons:
             electron.associate_atom(self)
 
+            if share:
+                self._electrons.append(electron)
+    
+        self._electron_configuration = self._configure_electrons()
+
         return electrons
+   
+    def _find_sharable_electron(self):
+        outermost_electrons = self._electron_configuration['configuration'][self._electron_configuration['outermost_shell']]
+        for electron in outermost_electrons:
+            if len(electron.get_associated_atoms()) == 1:
+                return electron
+        return None
 
     def _calculate_valence(self):
         # This will break when an atom has no electrons, TODO: some robustness here
@@ -206,13 +227,6 @@ class Atom:
         # TODO: Some serious code reduction here
         return electron_config
 
-        def _find_sharable_electron():
-            outermost_electrons = self._electron_configuration['configuration'][self._electron_configuration['outermost_shell']]
-            for electron in outermost_electrons:
-                if len(electron.get_associated_atoms()) == 1:
-                    return electron
-            return None
-
 
 class Molecule:
     """An atomic cartel"""
@@ -258,7 +272,7 @@ class Molecule:
         counted = []
         empirical_formula = ''
         for atom in self._atomic_members:
-            print(self._atomic_members)
+            # print(self._atomic_members)
             if str(atom) not in counted:
                 empirical_formula += f'{atom.get_symbol()}{self.list_atomic_members().count(str(atom))}'
                 counted.append(str(atom))
